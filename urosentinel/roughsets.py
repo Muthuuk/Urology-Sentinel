@@ -46,7 +46,12 @@ def discretise(df: pd.DataFrame, cuts: dict | None = None, quantile_cols: list |
         elif quantile_cols and col in quantile_cols:
             out[col] = pd.qcut(s, q=q, labels=[f"q{i+1}" for i in range(q)], duplicates="drop").astype(object)
         else:
-            out[col] = s.astype(object)
+            # Write whole numbers the same way whatever their type (1, 1.0 and "1" all become "1"),
+            # so a new patient's answers always match the training table.
+            if pd.api.types.is_numeric_dtype(s):
+                out[col] = s.map(lambda v: str(int(v)) if pd.notna(v) and float(v).is_integer() else v).astype(object)
+            else:
+                out[col] = s.astype(object)
         out[col] = out[col].where(pd.notna(out[col]), "missing").astype(str)
     return out
 

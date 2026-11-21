@@ -169,3 +169,16 @@ def test_clinical_service_triage_flags_and_feedback(trained, tmp_path):
 
 def test_red_flags_quiet_for_unremarkable_case():
     assert red_flags({"Age": 30, "Haematuria": 0, "Fever": 0, "PVR_ml": 20, "Neuro_History": 0}) == []
+
+
+def test_discretise_matches_int_and_float_inputs():
+    a = rs.discretise(pd.DataFrame({"Fever": [1, 0]}))
+    b = rs.discretise(pd.DataFrame({"Fever": [1.0, 0.0]}))
+    assert a.equals(b)
+
+
+def test_clinical_triage_recognises_known_profiles(trained):
+    _, cm, R = trained
+    svc = ClinicalService(cm, R, rs.CLINICAL_CUTS)
+    statuses = {svc.predict(cm.X_test.iloc[i].to_dict(), explain=False)["rough_set"]["status"] for i in range(40)}
+    assert statuses != {"unseen"}
