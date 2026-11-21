@@ -103,15 +103,43 @@ def agreement(shap_top: list, lime_list: list, features: list, k: int = 3) -> fl
     return len(s & l) / max(len(s), 1)
 
 
+# Yes/no inputs, described in words rather than as 1 or 0.
+BINARY_TEXT = {
+    "female": ("female", "male"), "Female": ("female", "male"),
+    "diabetes": ("diabetes", "no diabetes"), "kidney_weak": ("a kidney condition", "no kidney condition"),
+    "stress_leak": ("leaks when coughing or lifting", "no leaks when coughing or lifting"),
+    "Fever": ("fever", "no fever"), "Dysuria": ("pain or burning when passing urine", "no pain when passing urine"),
+    "Haematuria": ("blood in the urine", "no blood in the urine"),
+    "Nitrite_Positive": ("nitrite dipstick positive", "nitrite dipstick negative"),
+    "Neuro_History": ("a neurological condition", "no neurological condition"),
+    "Weak_Stream": ("a weak urine stream", "a normal urine stream"),
+}
+
+
+def describe(f: str, val) -> str:
+    """Describe one input and its value in words, for example 'nitrite dipstick negative'."""
+    if f in BINARY_TEXT and val is not None and float(val) in (0.0, 1.0):
+        return BINARY_TEXT[f][0] if float(val) == 1.0 else BINARY_TEXT[f][1]
+    name = FEATURE_TEXT.get(f, f)
+    if val is None:
+        return name
+    v = float(val)
+    return f"{name}: {int(v) if v.is_integer() else round(v, 1)}"
+
+
 def plain_english(top: list[tuple[str, float]], values: dict, audience: str = "patient") -> list[str]:
-    """Turn the top SHAP contributions into short sentences."""
+    """Turn the top SHAP contributions into short sentences.
+
+    Clinician sentences give the size of each contribution in the model's own units (log-odds for
+    gradient boosting, probability for random forest and permutation explanations), so sizes can be
+    compared within one patient but not across models.
+    """
     lines = []
     for f, v in top:
-        name = FEATURE_TEXT.get(f, f)
         direction = "raised" if v > 0 else "lowered"
         val = values.get(f)
         if audience == "patient":
-            lines.append(f"Your answer about {name} {direction} the result.")
+            lines.append(f"Your answer about {FEATURE_TEXT.get(f, f)} {direction} the result.")
         else:
-            lines.append(f"{name} = {val}: {direction} the score by {abs(v):.3f}")
+            lines.append(f"{describe(f, val)}: {direction} the score by {abs(v):.2f}")
     return lines

@@ -182,3 +182,10 @@ def test_clinical_triage_recognises_known_profiles(trained):
     svc = ClinicalService(cm, R, rs.CLINICAL_CUTS)
     statuses = {svc.predict(cm.X_test.iloc[i].to_dict(), explain=False)["rough_set"]["status"] for i in range(40)}
     assert statuses != {"unseen"}
+
+
+def test_clinician_explanations_use_words_for_yes_no_inputs():
+    from urosentinel.explain import plain_english
+    lines = plain_english([("Female", 0.5), ("Nitrite_Positive", -0.2), ("PVR_ml", 0.1)],
+                          {"Female": 0.0, "Nitrite_Positive": 0.0, "PVR_ml": 320.0}, "clinician")
+    assert lines[0].startswith("male:") and "nitrite dipstick negative" in lines[1] and "320" in lines[2]

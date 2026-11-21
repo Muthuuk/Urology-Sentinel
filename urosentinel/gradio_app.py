@@ -33,13 +33,15 @@ def build_app(screening: ScreeningService, clinical: ClinicalService):
              "Weak_Stream": float(weak)}
         r = clinical.predict(x)
         md = ("".join(f"**RED FLAG:** {f}\n\n" for f in r["red_flags"]) +
-              f"### Suggestion: {r['suggestion']}\n**Triage:** {r['triage']}\n\n"
+              f"### Suggestion: {r['suggestion']} ({r['probabilities'][r['suggestion']]:.0%})\n**Triage:** {r['triage']}\n\n"
               f"**Rough set:** {r['rough_set']['status']} ({r['rough_set']['matches']} similar past patients)\n\n"
               f"**Guideline pointer:** {r['guideline']}\n\n"
-              f"**SHAP and LIME agree on {r['agreement']:.0%} of the top 3 reasons.**\n\n" +
+              f"**SHAP and LIME agree on {r['agreement']:.0%} of the top 3 reasons.** Main reasons (SHAP, model units):\n\n" +
               "\n".join(f"- {t}" for t in r["explanation"]) + f"\n\n_{DISCLAIMER}_")
         fig, ax = plt.subplots(figsize=(6, 3))
         ax.barh(list(r["probabilities"])[::-1], list(r["probabilities"].values())[::-1], color="#0B6E99")
+        for i, v in enumerate(list(r["probabilities"].values())[::-1]):
+            ax.text(min(v + 0.02, 0.9), i, f"{v:.0%}", va="center", fontsize=9)
         ax.set_xlim(0, 1); ax.set_title("Probability by condition"); plt.tight_layout()
         return md, fig
 
