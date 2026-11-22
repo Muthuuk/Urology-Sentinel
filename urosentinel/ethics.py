@@ -119,6 +119,15 @@ def ethical_clean(df: pd.DataFrame, valid_ranges: dict | None = None,
     return out.reset_index(drop=True), log
 
 
+def _as_labels(s: pd.Series) -> pd.Series:
+    """Group labels as plain text, with missing values shown as "Not recorded".
+
+    Converting to text first matters: a categorical column (such as the output of ``age_band``)
+    refuses a new label like "Not recorded", and newer pandas versions raise an error for it.
+    """
+    return s.astype(object).where(s.notna(), "Not recorded").astype(str)
+
+
 def representativeness(df: pd.DataFrame, group_cols: list, weight_col: str | None = None) -> pd.DataFrame:
     """Share of each group in the sample, and in the population once survey weights are applied.
 
@@ -129,7 +138,7 @@ def representativeness(df: pd.DataFrame, group_cols: list, weight_col: str | Non
     for col in group_cols:
         if col not in df.columns:
             continue
-        g = df[col].fillna("Not recorded")
+        g = _as_labels(df[col])
         unweighted = g.value_counts(normalize=True)
         if weight_col and weight_col in df.columns:
             w = df[weight_col].fillna(0)
@@ -144,7 +153,10 @@ def representativeness(df: pd.DataFrame, group_cols: list, weight_col: str | Non
 
 
 def age_band(age: pd.Series) -> pd.Series:
-    return pd.cut(age, bins=[0, 39, 59, 74, 200], labels=["18-39", "40-59", "60-74", "75+"])
+    """Age bands for reporting. Returned as plain text (missing ages stay missing) so later steps
+    can add labels such as "Not recorded" without a categorical-type error."""
+    bands = pd.cut(age, bins=[0, 39, 59, 74, 200], labels=["18-39", "40-59", "60-74", "75+"])
+    return bands.astype(object).where(bands.notna(), np.nan)
 
 
 def fairness_audit(y_true, y_pred, y_prob, groups: pd.DataFrame, min_n: int = 30,
@@ -160,7 +172,7 @@ def fairness_audit(y_true, y_pred, y_prob, groups: pd.DataFrame, min_n: int = 30
     y_prob = np.asarray(y_prob)
     rows = []
     for col in groups.columns:
-        g = groups[col].astype(str).fillna("Not recorded").values
+        g = _as_labels(groups[col]).values
         for level in pd.unique(g):
             m = g == level
             n, pos = int(m.sum()), int(y_true[m].sum())

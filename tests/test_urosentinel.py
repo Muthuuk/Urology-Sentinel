@@ -189,3 +189,12 @@ def test_clinician_explanations_use_words_for_yes_no_inputs():
     lines = plain_english([("Female", 0.5), ("Nitrite_Positive", -0.2), ("PVR_ml", 0.1)],
                           {"Female": 0.0, "Nitrite_Positive": 0.0, "PVR_ml": 320.0}, "clinician")
     assert lines[0].startswith("male:") and "nitrite dipstick negative" in lines[1] and "320" in lines[2]
+
+
+def test_representativeness_handles_missing_age_band():
+    # Regression: Colab (newer pandas) raised "Cannot setitem on a Categorical with a new category"
+    df = pd.DataFrame({"age": [25, 50, None, 80], "sex": ["F", "M", None, "F"], "survey_weight": [1, 2, 1, 1]})
+    df["age_band"] = ethics.age_band(df["age"])
+    table = ethics.representativeness(df, ["sex", "age_band"], "survey_weight")
+    assert "Not recorded" in set(table["group"])
+    assert abs(table[table.characteristic == "age_band"]["population_share"].sum() - 1) < 0.01
