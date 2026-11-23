@@ -14,6 +14,21 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+# Hugging Face may give a new free Space "ZeroGPU" hardware, which refuses to start unless the app
+# registers at least one GPU function. UroSentinel needs no graphics card (everything runs on the
+# normal processor), so this small placeholder satisfies that check and is never used for the models.
+try:
+    import spaces
+    _gpu = spaces.GPU
+except ImportError:          # running on a laptop, Colab or CPU hardware
+    def _gpu(func):
+        return func
+
+
+@_gpu
+def gpu_placeholder():
+    return "UroSentinel runs on the CPU"
+
 from urosentinel import data_sources as ds, ethics, models as m, roughsets as rs
 from urosentinel.gradio_app import build_app
 from urosentinel.service import ClinicalService, ScreeningService
