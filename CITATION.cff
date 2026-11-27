@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Urology-Sentinel (UroSentinel): explainable, ethics-by-design AI for bladder health screening and differential diagnosis (research prototype)"
+type: software
+version: 3.0.0
+date-released: 2026-11-27
+license: MIT
+repository-code: "https://github.com/Muthuuk/Urology-Sentinel"
+authors:
+  - family-names: Ramachandran
+    given-names: Muthu
+    orcid: "https://orcid.org/0000-0002-5303-3100"
+    affiliation: "Forti5 Technologies Ltd; CAIDS, University of South Africa"
+keywords:
+  - urology
+  - overactive bladder
+  - bladder pain syndrome
+  - explainable AI
+  - SHAP
+  - rough sets
+  - NHANES
+  - clinical decision support
+  - ethics by design
+  - V-EGRCSbyD

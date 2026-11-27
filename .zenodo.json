@@ -1,0 +1,27 @@
+{
+  "title": "Urology-Sentinel (UroSentinel): explainable, ethics-by-design AI for bladder health screening and differential diagnosis (research prototype)",
+  "upload_type": "software",
+  "description": "<p>Urology-Sentinel (UroSentinel) is version 3 of the Urology prediction model. It combines population screening for an overactive bladder (OAB-wet) proxy on pooled NHANES survey data, classical rough set rules on the UCI Acute Inflammations dataset, and a six-condition clinical differential (OAB, IC/BPS, acute and recurrent cystitis, neurogenic bladder, bladder outlet obstruction). It provides SHAP and LIME explanations, patient and clinician screens, a Gradio web app, a UK data loader for approved sources, and a V-EGRCSbyD governance checklist with model cards. It builds on two ABH 2026 studies: a comparative deep learning study for symptom-based OAB prediction with SHAP explainability (Subbiah and Ramachandran) and rough set-augmented ensemble machine learning for OAB/BPS differential diagnosis (Ramachandran and Kavitha).</p><p>Research prototype only: not a medical device and does not diagnose any condition.</p>",
+  "creators": [
+    {
+      "name": "Ramachandran, Muthu",
+      "affiliation": "Forti5 Technologies Ltd; CAIDS, University of South Africa",
+      "orcid": "0000-0002-5303-3100"
+    }
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "version": "3.0.0",
+  "keywords": [
+    "urology",
+    "overactive bladder",
+    "bladder pain syndrome",
+    "explainable AI",
+    "SHAP",
+    "rough sets",
+    "NHANES",
+    "clinical decision support",
+    "ethics by design",
+    "V-EGRCSbyD"
+  ]
+}
